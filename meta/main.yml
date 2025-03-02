@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  role_name: consul
+  namespace: security
+  author: gambojo
+  description: Hashicorp consul server for Debian
+  license: MIT License
+  min_ansible_version: '2.10'
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+  galaxy_tags:
+    - consul
+    - hashicorp

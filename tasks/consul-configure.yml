@@ -1,0 +1,48 @@
+---
+- name: consul-configure | Generate consul key
+  ansible.builtin.command: "{{ consul_dir_bin }}/consul keygen > {{ consul_dir_conf }}/consul_key.file"
+  register: consul_keygen
+  args:
+    creates: "{{ consul_dir_conf }}/consul_key.file"
+  when: inventory_hostname == consul_master
+  no_log: true
+
+- name: consul-tls | Slurp consul key
+  ansible.builtin.slurp:
+    src: "{{ consul_dir_conf }}/consul_key.file"
+  register: consul_keygenslurp
+  when: inventory_hostname == consul_master
+  no_log: true
+
+- name: consul-tls | Add consul key to nodes
+  ansible.builtin.copy:
+    content: "{{ hostvars[consul_master]['consul_keygenslurp']['content'] | b64decode }}"
+    dest: "{{ consul_dir_conf }}/consul_key.file"
+    mode: "0600"
+  when:
+    - inventory_hostname == consul_master
+    - hostvars[consul_master]['consul_keygen']['changed']
+  no_log: true
+
+- name: consul-configure | Create consul config
+  ansible.builtin.template:
+    src: "config.hcl.j2"
+    dest: "{{ consul_dir_conf }}/config.hcl"
+    owner: "{{ consul_user }}"
+    group: "{{ consul_group }}"
+    mode: '0644'
+  notify: RESTART CONSUL
+
+- name: consul-configure | Validate config
+  ansible.builtin.command: "{{ consul_dir_bin }}/consul validate {{ consul_dir_conf }}"
+  changed_when: false
+  no_log: true
+
+- name: consul-configure | Create consul service
+  ansible.builtin.template:
+    src: "consul.service.j2"
+    dest: "/etc/systemd/system/consul.service"
+    owner: "{{ consul_user }}"
+    group: "{{ consul_group }}"
+    mode: '0644'
+  notify: RESTART CONSUL

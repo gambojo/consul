@@ -1,0 +1,22 @@
+---
+- name: consul-check | Check consul group
+  ansible.builtin.assert:
+    that: groups.consul is defined
+
+- name: consul-check | Set consul_master variable
+  ansible.builtin.set_fact:
+    consul_master: >-
+      {%- if groups.consul | length > 1 -%}
+      {{- groups.consul -}}
+      {%- else -%}
+      {{- groups.consul[0] -}}
+      {%- endif -%}
+
+- name: consul-check | Check consul is installed
+  ansible.builtin.stat:
+    path: "{{ consul_dir_bin }}/consul"
+  register: consul_bin_check
+
+- name: consul-check | Set consul_installed variable
+  ansible.builtin.set_fact:
+    consul_installed: "{{ consul_bin_check.stat.exists }}"

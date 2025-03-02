@@ -1,0 +1,21 @@
+---
+driver:
+  name: docker
+platforms:
+  - name: consul-cluster-1
+    groups:
+      - consul
+    image: alvistack/debian-testing
+    pre_build_image: true
+  - name: consul-cluster-2
+    groups:
+      - consul
+    image: alvistack/debian-testing
+    pre_build_image: true
+  - name: consul-cluster-3
+    groups:
+      - consul
+    image: alvistack/debian-testing
+    pre_build_image: true
+verifier:
+  name: testinfra

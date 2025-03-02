@@ -1,0 +1,13 @@
+---
+- name: consul | Check
+  ansible.builtin.include_tasks: consul-check.yml
+
+- name: consul | Install consul
+  ansible.builtin.include_tasks: consul-install.yml
+
+- name: consul | Generate certificates
+  ansible.builtin.include_tasks: consul-tls.yml
+  when: consul_tls_enable
+
+- name: consul | Configure consul
+  ansible.builtin.include_tasks: consul-configure.yml

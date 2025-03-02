@@ -1,0 +1,36 @@
+---
+consul_version: 1.20.4
+consul_source_url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip"
+
+consul_dir_bin: /opt/consul/bin
+consul_dir_conf: /opt/consul/etc
+consul_dir_data: /opt/consul/data
+consul_dir_tls: /opt/consul/tls
+consul_dir_log: /opt/consul/log
+
+consul_user: "consul"
+consul_group: "consul"
+consul_uid: 922
+consul_gid: 922
+
+consul_port_http: 8500
+consul_port_https: 8501
+
+consul_tls_enable: true
+
+consul_conf_datacenter: "DC1"
+consul_conf_ui: true
+consul_conf_server: true
+consul_conf_client_addr: "0.0.0.0"
+consul_conf_log_level: "info"
+consul_conf_log_file: "{{ consul_dir_log }}/consul.log"
+consul_conf_log_rotate_duration: "24h"
+consul_conf_log_rotate_bytes: 104857600
+consul_conf_log_rotate_max_files: 7
+consul_conf_enable_script_checks: true
+consul_conf_domain: consul
+consul_conf_leave_on_terminate: true
+consul_conf_rejoin_after_leave: true
+consul_conf_enable_truncate: true
+consul_conf_only_passing: true
+consul_conf_tls_verify_incoming: false

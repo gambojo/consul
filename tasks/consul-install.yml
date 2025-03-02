@@ -1,0 +1,65 @@
+---
+- name: consul-install | Install zip
+  ansible.builtin.apt:
+    update_cache: true
+    name:
+      - zip
+      - unzip
+
+- name: consul-install | Create consul group
+  ansible.builtin.group:
+    name: "{{ consul_group }}"
+    system: true
+    gid: '{{ consul_gid }}'
+
+- name: consul-install | Create consul user
+  ansible.builtin.user:
+    name: "{{ consul_user }}"
+    uid: "{{ consul_uid }}"
+    shell: /bin/false
+    group: "{{ consul_group }}"
+    system: true
+    home: "{{ consul_dir_data }}"
+    create_home: false
+
+- name: consul-install | Create consul conig dirs
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ consul_dir_bin }}"
+    - "{{ consul_dir_conf }}"
+    - "{{ consul_dir_data }}"
+    - "{{ consul_dir_tls }}"
+    - "{{ consul_dir_log }}"
+
+- name: consul-install | Download consul archive
+  ansible.builtin.get_url:
+    url: "{{ consul_source_url }}"
+    dest: "/tmp/{{ consul_source_url | basename }}"
+    mode: '0664'
+  when: not consul_installed
+
+- name: consul-install | Extract consul archive
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ consul_source_url | basename }}"
+    dest: "{{ consul_dir_bin }}/"
+    remote_src: true
+    include: "consul"
+    creates: "{{ consul_dir_bin }}/consul"
+    owner: "{{ consul_user }}"
+    group: "{{ consul_group }}"
+    mode: '0755'
+  when: not consul_installed
+
+- name: consul-install | Remove extracted archive
+  ansible.builtin.file:
+    path: "/tmp/{{ consul_source_url | basename }}"
+    state: absent
+
+- name: consul-install | Create symlink to default bin path
+  ansible.builtin.file:
+    src: "{{ consul_dir_bin }}/consul"
+    dest: "/usr/local/bin/consul"
+    state: link

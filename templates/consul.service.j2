@@ -1,0 +1,26 @@
+[Unit]
+Description=Consul Service Discovery Agent
+Documentation=https://www.consul.io/
+Requires=network-online.target
+After=network-online.target
+ConditionFileNotEmpty={{ consul_dir_conf }}/config.hcl
+
+[Service]
+User={{ consul_user }}
+Group={{ consul_group }}
+ExecStart={{ consul_dir_bin }}/consul agent -config-dir={{ consul_dir_conf }}
+ExecReload=/bin/kill --signal HUP
+KillSignal=SIGINT
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=5
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+PrivateDevices=yes
+SecureBits=keep-caps
+AmbientCapabilities=CAP_IPC_LOCK
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,70 @@
+# Main settings
+datacenter = "{{ consul_conf_datacenter }}"
+data_dir = "{{ consul_dir_data }}"
+server = {{ consul_conf_server | string | lower }}
+bootstrap_expect = {{ groups.consul | length | int }}
+
+# Network settings
+bind_addr = "{{ ansible_default_ipv4.address }}"
+client_addr = "{{ consul_conf_client_addr }}"
+advertise_addr = "{{ ansible_default_ipv4.address }}"
+node_name = "{{ ansible_hostname }}"
+domain = "{{ consul_conf_domain }}"
+ports {
+    http = {{ consul_port_http }}
+{% if consul_tls_enable %}
+    https = {{ consul_port_https }}
+{% endif %}
+}
+
+# Web innerface enable
+ui = {{ consul_conf_ui | string | lower }}
+
+# DNS settings
+dns_config {
+    enable_truncate = {{ consul_conf_enable_truncate | string | lower }}
+    only_passing = {{ consul_conf_only_passing | string | lower }}
+}
+
+{% if consul_tls_enable %}
+# TLS settings
+tls {
+  defaults {
+    ca_file   = "{{ consul_dir_tls }}/ca.crt"
+    cert_file = "{{ consul_dir_tls }}/consul.crt"
+    key_file  = "{{ consul_dir_tls }}/consul.key"
+  }
+  internal_rpc {
+    verify_incoming = true
+    verify_outgoing = true
+  }
+  https {
+    verify_incoming = {{ consul_conf_tls_verify_incoming | string | lower }}
+  }
+}
+{% endif %}
+
+# Log settings
+log_level = "{{ consul_conf_log_level }}"
+log_file = "{{ consul_conf_log_file }}"
+log_rotate_duration = "{{ consul_conf_log_rotate_duration }}"
+log_rotate_bytes = {{ consul_conf_log_rotate_bytes }}
+log_rotate_max_files = {{ consul_conf_log_rotate_max_files }}
+
+start_join = [
+{% for host in groups.consul %}
+    "{{ hostvars[host]['ansible_hostname'] }}"{% if not loop.last %},{% endif %}
+{% endfor %}
+]
+
+retry_join = [
+{% for host in groups.consul %}
+    "{{ hostvars[host]['ansible_hostname'] }}"{% if not loop.last %},{% endif %}
+{% endfor %}
+]
+
+# Extra settings
+enable_script_checks = {{ consul_conf_enable_script_checks | string | lower }}
+leave_on_terminate = {{ consul_conf_leave_on_terminate | string | lower }}
+rejoin_after_leave = {{ consul_conf_rejoin_after_leave | string | lower }}
+encrypt = "{{ hostvars[consul_master]['consul_keygenslurp']['content'] | b64decode }}"

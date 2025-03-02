@@ -1,0 +1,6 @@
+---
+- name: RESTART CONSUL
+  ansible.builtin.service:
+    name: consul
+    state: restarted
+    enabled: true
