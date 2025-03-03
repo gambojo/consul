@@ -56,3 +56,8 @@
     group: "{{ consul_group }}"
     mode: '0644'
   notify: RESTART CONSUL
+
+- name: consul-configure | Start consul
+  ansible.builtin.service:
+    name: consul
+    state: started
