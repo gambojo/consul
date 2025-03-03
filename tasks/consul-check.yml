@@ -2,14 +2,20 @@
 - name: consul-check | Check consul group
   ansible.builtin.assert:
     that: groups.consul is defined
+    msg: "Required group 'consul'"
+
+- name: consul-check | Check consul group
+  ansible.builtin.assert:
+    that: consul_port_http is defined or
+          consul_port_https is defined
 
 - name: consul-check | Set consul_master variable
   ansible.builtin.set_fact:
     consul_master: >-
       {%- if groups.consul | length > 1 -%}
-      {{- groups.consul -}}
-      {%- else -%}
       {{- groups.consul[0] -}}
+      {%- else -%}
+      {{- groups.consul -}}
       {%- endif -%}
 
 - name: consul-check | Check consul is installed

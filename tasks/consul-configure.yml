@@ -1,13 +1,23 @@
 ---
 - name: consul-configure | Generate consul key
-  ansible.builtin.command: "{{ consul_dir_bin }}/consul keygen > {{ consul_dir_conf }}/consul_key.file"
+  ansible.builtin.command: "{{ consul_dir_bin }}/consul keygen"
   register: consul_keygen
   args:
     creates: "{{ consul_dir_conf }}/consul_key.file"
   when: inventory_hostname == consul_master
   no_log: true
 
-- name: consul-tls | Slurp consul key
+- name: consul-configure | Save consul key
+  ansible.builtin.lineinfile:
+    line: "{{ consul_keygen.stdout }}"
+    path: "{{ consul_dir_conf }}/consul_key.file"
+    create: true
+    mode: '0600'
+  when:
+    - inventory_hostname == consul_master
+    - consul_keygen is changed
+
+- name: consul-configure | Slurp consul key
   ansible.builtin.slurp:
     src: "{{ consul_dir_conf }}/consul_key.file"
   register: consul_keygenslurp
@@ -20,7 +30,7 @@
     dest: "{{ consul_dir_conf }}/consul_key.file"
     mode: "0600"
   when:
-    - inventory_hostname == consul_master
+    - inventory_hostname != consul_master
     - hostvars[consul_master]['consul_keygen']['changed']
   no_log: true
 

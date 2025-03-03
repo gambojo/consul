@@ -16,7 +16,7 @@
   ansible.builtin.user:
     name: "{{ consul_user }}"
     uid: "{{ consul_uid }}"
-    shell: /bin/false
+    shell: /usr/sbin/nologin
     group: "{{ consul_group }}"
     system: true
     home: "{{ consul_dir_data }}"
@@ -30,9 +30,25 @@
   loop:
     - "{{ consul_dir_bin }}"
     - "{{ consul_dir_conf }}"
-    - "{{ consul_dir_data }}"
     - "{{ consul_dir_tls }}"
     - "{{ consul_dir_log }}"
+
+- name: consul-install | Create consul data dir
+  ansible.builtin.file:
+    path: "{{ consul_dir_data }}"
+    state: directory
+    owner: "{{ consul_user }}"
+    group: "{{ consul_group }}"
+    mode: '0755'
+
+- name: vault-install | Create vault log file
+  ansible.builtin.file:
+    path: "{{ consul_dir_log }}/consul.log"
+    state: touch
+    owner: "{{ consul_user }}"
+    group: "{{ consul_group }}"
+    mode: '0664'
+  changed_when: false
 
 - name: consul-install | Download consul archive
   ansible.builtin.get_url:

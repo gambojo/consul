@@ -11,8 +11,10 @@ advertise_addr = "{{ ansible_default_ipv4.address }}"
 node_name = "{{ ansible_hostname }}"
 domain = "{{ consul_conf_domain }}"
 ports {
+{% if consul_port_http is defined %}
     http = {{ consul_port_http }}
-{% if consul_tls_enable %}
+{% endif %}
+{% if consul_port_https is defined %}
     https = {{ consul_port_https }}
 {% endif %}
 }
@@ -26,7 +28,7 @@ dns_config {
     only_passing = {{ consul_conf_only_passing | string | lower }}
 }
 
-{% if consul_tls_enable %}
+{% if consul_port_https is defined %}
 # TLS settings
 tls {
   defaults {
@@ -52,19 +54,27 @@ log_rotate_bytes = {{ consul_conf_log_rotate_bytes }}
 log_rotate_max_files = {{ consul_conf_log_rotate_max_files }}
 
 start_join = [
+{% if groups.consul | length > 1 %}
 {% for host in groups.consul %}
     "{{ hostvars[host]['ansible_hostname'] }}"{% if not loop.last %},{% endif %}
 {% endfor %}
+{% else %}
+    "{{ ansible_hostname }}"
+{% endif %}
 ]
 
 retry_join = [
+{% if groups.consul | length > 1 %}
 {% for host in groups.consul %}
     "{{ hostvars[host]['ansible_hostname'] }}"{% if not loop.last %},{% endif %}
 {% endfor %}
+{% else %}
+    "{{ ansible_hostname }}"
+{% endif %}
 ]
 
 # Extra settings
 enable_script_checks = {{ consul_conf_enable_script_checks | string | lower }}
 leave_on_terminate = {{ consul_conf_leave_on_terminate | string | lower }}
 rejoin_after_leave = {{ consul_conf_rejoin_after_leave | string | lower }}
-encrypt = "{{ hostvars[consul_master]['consul_keygenslurp']['content'] | b64decode }}"
+encrypt = "{{- hostvars[consul_master]['consul_keygenslurp']['content'] | b64decode | regex_replace('\n', '') -}}"

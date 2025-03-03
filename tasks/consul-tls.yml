@@ -7,8 +7,8 @@
     owner: "{{ consul_user }}"
     group: "{{ consul_group }}"
     mode: '0600'
-  when: inventory_hostname == consul_master
   register: consul_tls_cakey
+  when: inventory_hostname == consul_master
 
 - name: consul-tls | Create certificate signing request for self-signed certificate
   community.crypto.openssl_csr_pipe:
@@ -23,9 +23,9 @@
   register: consul_ca_req
   when:
     - inventory_hostname == consul_master
-    - hostvars[consul_master]['consul_tls_cakey']['changed']
+    - consul_tls_cakey is changed
 
-- name: consul-tls | Reate self-signed certificate from csr
+- name: consul-tls | Create self-signed certificate from csr
   community.crypto.x509_certificate:
     path: "{{ consul_dir_tls }}/ca.crt"
     csr_content: "{{ consul_ca_req.csr }}"
@@ -37,7 +37,7 @@
     mode: '0644'
   when:
     - inventory_hostname == consul_master
-    - hostvars[consul_master]['consul_ca_req']['changed']
+    - consul_ca_req is changed
 
 - name: consul-tls | Slurp ca crt
   ansible.builtin.slurp:
@@ -57,7 +57,7 @@
     group: "{{ consul_group }}"
     mode: "{% if 'PRIVATE KEY' in (item.content | b64decode) %}0600{% else %}0644{% endif %}"
   when:
-    - inventory_hostname == consul_master
+    - inventory_hostname != consul_master
     - hostvars[consul_master]['consul_tls_cakey']['changed']
   loop: "{{ hostvars[consul_master]['consul_tls_caslurp']['results'] }}"
   no_log: true
