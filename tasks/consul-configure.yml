@@ -60,4 +60,4 @@
 - name: consul-configure | Start consul
   ansible.builtin.service:
     name: consul
-    state: restarted
+    state: started
