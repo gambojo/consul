@@ -16,7 +16,7 @@ consul_gid: 922
 consul_port_https: 8501
 
 consul_conf_datacenter: "DC1"
-consul_conf_ui: true
+consul_conf_ui_config: true
 consul_conf_server: true
 consul_conf_client_addr: "0.0.0.0"
 consul_conf_log_level: "info"

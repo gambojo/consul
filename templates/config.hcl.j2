@@ -20,7 +20,9 @@ ports {
 }
 
 # Web innerface enable
-ui = {{ consul_conf_ui | string | lower }}
+ui_config {
+    enabled = {{ consul_conf_ui_config | string | lower }}
+}
 
 # DNS settings
 dns_config {
@@ -78,3 +80,15 @@ enable_script_checks = {{ consul_conf_enable_script_checks | string | lower }}
 leave_on_terminate = {{ consul_conf_leave_on_terminate | string | lower }}
 rejoin_after_leave = {{ consul_conf_rejoin_after_leave | string | lower }}
 encrypt = "{{- hostvars[consul_master]['consul_keygenslurp']['content'] | b64decode | regex_replace('\n', '') -}}"
+
+{% if consul_acl_enable %}
+# ACL settings
+acl {
+  enable = {{ consul_acl_enable | string | lower }}
+  default_policy = "deny"
+  enable_token_persistence = {{ consul_acl_enable | string | lower }}
+  tokens {
+      master = "d9f1928e-1f84-407c-ab50-9579de563df5"
+  }
+}
+{% endif %}
