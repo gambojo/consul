@@ -30,6 +30,7 @@
 - name: consul-acl | Create a token
   community.general.consul_token:
     token: "{{ consul_acl_master_token }}"
+    secret_id: "{{ item.token }}"
     policies:
       - name: "{{ item.name }}"
   register: consul_tokens
@@ -43,16 +44,16 @@
     msg: "{{ consul_tokens }}"
   when: inventory_hostname == consul_master
 
-- name: consul-acl | Save results in var
-  ansible.builtin.set_fact:
-    consul_tokens: >-
-      {%- set output = {}  -%}
-      {%- for item in consul_tokens.results -%}
-      {%- set x = output.update({item.name: {'token': item.token.SecretID}}) -%}
-      {%- endfor -%}
-      {{- output -}}
+# - name: consul-acl | Save results in var
+#   ansible.builtin.set_fact:
+#     consul_tokens: >-
+#       {%- set output = {}  -%}
+#       {%- for item in consul_tokens.results -%}
+#       {%- set x = output.update({item.item.name: {'token': item.token.SecretID}}) -%}
+#       {%- endfor -%}
+#       {{- output -}}
 
-- name: consul_tokens
-  debug:
-    msg: "{{ consul_tokens }}"
-  when: inventory_hostname == consul_master
+# - name: consul_tokens
+#   debug:
+#     msg: "{{ consul_tokens }}"
+#   when: inventory_hostname == consul_master
