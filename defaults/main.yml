@@ -13,10 +13,7 @@ consul_group: "consul"
 consul_uid: 922
 consul_gid: 922
 
-consul_port_http: 8500
 consul_port_https: 8501
-
-consul_tls_enable: true
 
 consul_conf_datacenter: "DC1"
 consul_conf_ui: true
@@ -34,3 +31,6 @@ consul_conf_rejoin_after_leave: true
 consul_conf_enable_truncate: true
 consul_conf_only_passing: true
 consul_conf_tls_verify_incoming: false
+
+consul_acl_enable: false
+consul_policy: []

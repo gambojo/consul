@@ -1,0 +1,45 @@
+---
+- name: consul-acl | Bootstrap the ACL system
+  community.general.consul_acl_bootstrap:
+    state: bootstrapped
+  register: consul_bootstrapped
+  when: inventory_hostname == consul_master
+
+- name: consul-acl | Save managed token
+  ansible.builtin.copy:
+    content: "{{ hostvars[consul_bootstrapped]['result']['SecretID'] }}"
+    dest: "{{ consul_dir_conf }}/.managed_token"
+    mode: '0600'
+
+- name: consul-acl | Create a policy with rules
+  community.general.consul_policy:
+    token: "{{ consul_bootstrapped.result.SecretID }}"
+    name: "{{ item.name }}"
+    rules: |
+      "{{ item.rules }}"
+  register: consul_policy_result
+  loop: "{{ consul_policy }}"
+  when:
+    - inventory_hostname == consul_master
+    - consul_policy | length > 0
+
+- name: consul-acl | Create a token
+  community.general.consul_token:
+    token: "{{ consul_bootstrapped.result.SecretID }}"
+    policies:
+      name: "{{ item.name }}"
+  register: consul_tokens
+  loop: "{{ consul_policy }}"
+  when:
+    - inventory_hostname == consul_master
+    - consul_policy | length > 0
+    - consul_policy_result is changed
+
+- name: consul-acl | Save results in var
+  ansible.builtin.set_vars:
+    consul_tokens: >-
+      {%- set output = {}  -%}
+      {%- for item in consul_tokens.results -%}
+      {%- set x = output.update({item.name: {'token': item.token.SecretID}}) -%}
+      {%- endfor -%}
+      {{- output -}}
