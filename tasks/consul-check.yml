@@ -11,12 +11,10 @@
 
 - name: consul-check | Set consul_master variable
   ansible.builtin.set_fact:
-    consul_master: >-
-      {%- if groups.consul | length > 1 -%}
-      {{- groups.consul[0] -}}
-      {%- else -%}
-      {{- groups.consul -}}
-      {%- endif -%}
+    consul_master: "{%-
+      if groups.consul | length > 1 -%}{{- groups.consul[0] -}}{%-
+      else -%}{{- inventory_hostname -}}{%- endif
+      -%}"
 
 - name: consul-check | Check consul is installed
   ansible.builtin.stat:
