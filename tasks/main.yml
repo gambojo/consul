@@ -25,3 +25,7 @@
 
 - name: consul | Configure consul
   ansible.builtin.include_tasks: consul-configure.yml
+
+- name: consul | Configure ACL
+  ansible.builtin.include_tasks: consul-acl.yml
+  when: consul_acl_enable
