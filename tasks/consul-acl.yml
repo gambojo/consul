@@ -15,8 +15,7 @@
   community.general.consul_policy:
     token: "{{ consul_acl_master_token }}"
     name: "{{ item.name }}"
-    rules: |
-      "{{ item.rules }}"
+    rules: "{{ item.rules }}"
   register: consul_policy_result
   loop: "{{ consul_policy }}"
   when:
@@ -38,7 +37,6 @@
   when:
     - inventory_hostname == consul_master
     - consul_policy | length > 0
-    - consul_policy_result is changed
 
 - name: consul_tokens
   debug:
