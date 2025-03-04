@@ -83,12 +83,10 @@ encrypt = "{{- hostvars[consul_master]['consul_keygenslurp']['content'] | b64dec
 
 {% if consul_acl_enable %}
 # ACL settings
+acl_master_token = "{{ consul_acl_master_token }}"
 acl {
-  enable = {{ consul_acl_enable | string | lower }}
-  default_policy = "deny"
-  enable_token_persistence = {{ consul_acl_enable | string | lower }}
-  tokens {
-      master = "d9f1928e-1f84-407c-ab50-9579de563df5"
-  }
+    enabled = {{ consul_acl_enable | string | lower }}
+    default_policy = "{{ consul_acl_default_policy }}"
+    enable_token_persistence = {{ consul_acl_token_persistence | string | lower }}
 }
 {% endif %}
