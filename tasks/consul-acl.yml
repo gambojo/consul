@@ -5,6 +5,11 @@
   register: consul_bootstrapped
   when: inventory_hostname == consul_master
 
+- name: consul_bootstrapped
+  debug:
+    msg: "{{ consul_bootstrapped }}"
+  when: inventory_hostname == consul_master
+
 - name: consul-acl | Save managed token
   ansible.builtin.copy:
     content: "{{ hostvars[consul_bootstrapped]['result']['SecretID'] }}"
@@ -23,6 +28,11 @@
     - inventory_hostname == consul_master
     - consul_policy | length > 0
 
+- name: consul_policy_result
+  debug:
+    msg: "{{ consul_policy_result }}"
+  when: inventory_hostname == consul_master
+
 - name: consul-acl | Create a token
   community.general.consul_token:
     token: "{{ consul_bootstrapped.result.SecretID }}"
@@ -35,6 +45,11 @@
     - consul_policy | length > 0
     - consul_policy_result is changed
 
+- name: consul_tokens
+  debug:
+    msg: "{{ consul_tokens }}"
+  when: inventory_hostname == consul_master
+
 - name: consul-acl | Save results in var
   ansible.builtin.set_fact:
     consul_tokens: >-
@@ -43,3 +58,8 @@
       {%- set x = output.update({item.name: {'token': item.token.SecretID}}) -%}
       {%- endfor -%}
       {{- output -}}
+
+- name: consul_tokens
+  debug:
+    msg: "{{ consul_tokens }}"
+  when: inventory_hostname == consul_master
