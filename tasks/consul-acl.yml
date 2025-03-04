@@ -31,7 +31,7 @@
   community.general.consul_token:
     token: "{{ consul_acl_master_token }}"
     policies:
-      name: "{{ item.name }}"
+      - name: "{{ item.name }}"
   register: consul_tokens
   loop: "{{ consul_policy }}"
   when:
