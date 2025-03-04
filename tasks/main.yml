@@ -2,29 +2,32 @@
 - name: consul | Checking
   ansible.builtin.include_tasks: consul-check.yml
 
-- name: consul | Resolve hosts
-  ansible.builtin.blockinfile:
-    block: |
-      {% if groups.consul | length > 1 %}
-      {%    for host in groups.consul %}
-      {{ hostvars[host]['ansible_default_ipv4']['address'] }} {{ hostvars[host]['ansible_fqdn'] }} {{ hostvars[host]['ansible_hostname'] }}
-      {%    endfor %}
-      {% else %}
-      {{ ansible_default_ipv4 }} {{ ansible_fqdn }} {{ ansible_hostname }}
-      {% endif %}
-    path: /etc/hosts
-    marker: "# {mark} ANSIBLE MANAGED BLOCK CONSUL"
-    mode: '0644'
+# - name: consul | Resolve hosts
+#   ansible.builtin.blockinfile:
+#     block: |
+#       {% if groups.consul | length > 1 %}
+#       {%    for host in groups.consul %}
+#       {{ hostvars[host]['ansible_default_ipv4']['address'] }} {{ hostvars[host]['ansible_fqdn'] }} {{ hostvars[host]['ansible_hostname'] }}
+#       {%    endfor %}
+#       {% else %}
+#       {{ ansible_default_ipv4 }} {{ ansible_fqdn }} {{ ansible_hostname }}
+#       {% endif %}
+#     path: /etc/hosts
+#     marker: "# {mark} ANSIBLE MANAGED BLOCK CONSUL"
+#     mode: '0644'
 
-- name: consul | Install consul
-  ansible.builtin.include_tasks: consul-install.yml
+# - name: consul | Install consul
+#   ansible.builtin.include_tasks: consul-install.yml
 
-- name: consul | Generate certificates
-  ansible.builtin.include_tasks: consul-tls.yml
-  when: consul_port_https is defined
+# - name: consul | Generate certificates
+#   ansible.builtin.include_tasks: consul-tls.yml
+#   when: consul_port_https is defined
 
-- name: consul | Configure consul
-  ansible.builtin.include_tasks: consul-configure.yml
+# - name: consul | Configure consul
+#   ansible.builtin.include_tasks: consul-configure.yml
+
+- debug:
+    msg: "{{ consul_master }}"
 
 - name: consul | Configure ACL
   ansible.builtin.include_tasks: consul-acl.yml
