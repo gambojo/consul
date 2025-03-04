@@ -1,5 +1,5 @@
 ---
-- name: consul-tls | Create private key of ca for self-signing
+- name: consul-tls | Create CA private key
   community.crypto.openssl_privatekey:
     path: "{{ consul_dir_tls }}/ca.key"
     cipher: auto
@@ -10,7 +10,7 @@
   register: consul_tls_cakey
   when: inventory_hostname == consul_master
 
-- name: consul-tls | Create certificate signing request for self-signed certificate
+- name: consul-tls | Create CA csr
   community.crypto.openssl_csr_pipe:
     privatekey_path: "{{ consul_dir_tls }}/ca.key"
     common_name: "consul ca"
@@ -25,7 +25,7 @@
     - inventory_hostname == consul_master
     - consul_tls_cakey is changed
 
-- name: consul-tls | Create self-signed certificate from csr
+- name: consul-tls | Create CA certificate
   community.crypto.x509_certificate:
     path: "{{ consul_dir_tls }}/ca.crt"
     csr_content: "{{ consul_ca_req.csr }}"
@@ -39,7 +39,7 @@
     - inventory_hostname == consul_master
     - consul_ca_req is changed
 
-- name: consul-tls | Slurp ca crt
+- name: consul-tls | Slurp CA certificate
   ansible.builtin.slurp:
     src: "{{ consul_dir_tls }}/{{ item }}"
   register: consul_tls_caslurp
@@ -49,7 +49,7 @@
     - "ca.crt"
   no_log: true
 
-- name: consul-tls | Add ca crt to nodes
+- name: consul-tls | Add CA certificates to nodes
   ansible.builtin.copy:
     dest: "{{ consul_dir_tls }}/{% if 'PRIVATE KEY' in (item.content | b64decode) %}ca.key{% else %}ca.crt{% endif %}"
     content: "{{ item.content | b64decode }}"
@@ -62,7 +62,7 @@
   loop: "{{ hostvars[consul_master]['consul_tls_caslurp']['results'] }}"
   no_log: true
 
-- name: consul-tls | Create private key for consul
+- name: consul-tls | Create consul private key
   community.crypto.openssl_privatekey:
     path: "{{ consul_dir_tls }}/consul.key"
     size: 2048
@@ -71,7 +71,7 @@
     mode: '0600'
   register: consul_tls_key
 
-- name: consul-tls | Create certificate signing request for consul
+- name: consul-tls | Create consul csr
   community.crypto.openssl_csr_pipe:
     privatekey_path: "{{ consul_dir_tls }}/consul.key"
     common_name: "consul"
@@ -84,7 +84,7 @@
   register: consul_req
   when: consul_tls_key is changed
 
-- name: consul-tls | Generate an certificate signed with own CA certificate for consul
+- name: consul-tls | Generate consul certificate
   community.crypto.x509_certificate:
     path: "{{ consul_dir_tls }}/consul.crt"
     csr_content: "{{ consul_req.csr }}"
@@ -97,19 +97,19 @@
     mode: '0644'
   when: consul_req is changed
 
-- name: consul-tls | Create extra dir for consul ca cert
+- name: consul-tls | Create directory for consul CA certificate
   ansible.builtin.file:
     path: /usr/local/share/ca-certificates/CONSUL
     state: directory
     mode: '0755'
 
-- name: consul-tls | Create link to consul ca cert
+- name: consul-tls | Create link to consul CA certificate
   ansible.builtin.file:
     src: "{{ consul_dir_tls }}/ca.crt"
     dest: "/usr/local/share/ca-certificates/CONSUL/consul-ca.crt"
     state: link
   register: consul_ca_link
 
-- name: consul-tls | Update ca certificates
+- name: consul-tls | Update CA certificates
   ansible.builtin.command: /usr/sbin/update-ca-certificates --fresh
   when: consul_ca_link is changed

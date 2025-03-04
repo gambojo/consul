@@ -1,5 +1,5 @@
 ---
-- name: consul | Check
+- name: consul | Checking
   ansible.builtin.include_tasks: consul-check.yml
 
 - name: consul | Resolve hosts

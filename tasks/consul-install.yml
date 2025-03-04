@@ -2,9 +2,7 @@
 - name: consul-install | Install zip
   ansible.builtin.apt:
     update_cache: true
-    name:
-      - zip
-      - unzip
+    name: [zip, unzip]
 
 - name: consul-install | Create consul group
   ansible.builtin.group:
@@ -79,3 +77,4 @@
     src: "{{ consul_dir_bin }}/consul"
     dest: "/usr/local/bin/consul"
     state: link
+  when: '"{{ consul_dir_bin }}/consul" != "/usr/local/bin/consul"'

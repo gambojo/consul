@@ -4,7 +4,7 @@
     that: groups.consul is defined
     msg: "Required group 'consul'"
 
-- name: consul-check | Check consul group
+- name: consul-check | Check consul ports
   ansible.builtin.assert:
     that: consul_port_http is defined or
           consul_port_https is defined
