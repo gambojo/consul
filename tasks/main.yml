@@ -26,9 +26,6 @@
 - name: consul | Configure consul
   ansible.builtin.include_tasks: consul-configure.yml
 
-- debug:
-    msg: "{{ consul_master }}"
-
 - name: consul | Configure ACL
   ansible.builtin.include_tasks: consul-acl.yml
   when: consul_acl_enable
