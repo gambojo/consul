@@ -36,7 +36,7 @@
     - consul_policy_result is changed
 
 - name: consul-acl | Save results in var
-  ansible.builtin.set_vars:
+  ansible.builtin.set_fact:
     consul_tokens: >-
       {%- set output = {}  -%}
       {%- for item in consul_tokens.results -%}
