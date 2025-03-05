@@ -37,3 +37,5 @@ consul_acl_master_token: d9f1928e-1f84-407c-ab50-9579de563df5
 consul_acl_default_policy: deny
 consul_acl_token_persistence: true
 consul_policy: []
+
+consul_vault_group: vault

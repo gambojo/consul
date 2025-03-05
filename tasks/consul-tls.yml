@@ -67,7 +67,7 @@
     path: "{{ consul_dir_tls }}/consul.key"
     size: 2048
     owner: "{{ consul_user }}"
-    group: "{% vault_group if consul_for_vault else consul_user &}"
+    group: "{% consul_vault_group if consul_for_vault else consul_group &}"
     mode: '{% "0640" if consul_for_vault else "0600" %}'
   register: consul_tls_key
 
