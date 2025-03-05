@@ -68,7 +68,7 @@
     size: 2048
     owner: "{{ consul_user }}"
     group: "{% if consul_for_vault %}{{ consul_vault_group }}{% else %}{{ consul_group }}{% endif %}"
-    mode: '{% "0640" if consul_for_vault else "0600" %}'
+    mode: '{% if consul_for_vault %}"0640"{% else %}"0600"{% endif %}'
   register: consul_tls_key
 
 - name: consul-tls | Create consul csr
